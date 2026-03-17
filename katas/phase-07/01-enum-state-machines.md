@@ -77,8 +77,10 @@ fn main() {
 ## Correct Code
 
 ```rust
+#[derive(Debug)]
 struct OrderId(u64);
 
+#[derive(Debug)]
 enum Order {
     Pending {
         id: OrderId,
@@ -203,6 +205,17 @@ The correct version uses an enum where:
 - **`match` is exhaustive.** If you add a new variant (say `Cancelled`), the compiler forces you to handle it everywhere. No variant is accidentally ignored.
 
 **This is what "making illegal states unrepresentable" means.** The type system itself prevents the bugs. You do not need unit tests to verify that shipped orders have tracking numbers — the structure of the code guarantees it.
+
+## ⚠️ Caution
+
+- Duplicating data across enum variants (e.g., `items: Vec<Item>` in every variant) increases memory usage and makes updates error-prone. Consider separating shared data from state.
+- The broken version using strings for state compiles without errors — the bug is a logic error, not a type error. This is exactly why enum-based states are safer.
+
+## 💡 Tips
+
+- Use consuming transitions (`fn process(self) -> NextState`) to make invalid state transitions impossible — the old state is destroyed.
+- Add `#[derive(Debug)]` to state enums for easy logging during development.
+- For complex state machines, consider the typestate pattern (separate structs per state) for even stronger compile-time guarantees.
 
 ## Compiler Error Interpretation
 
